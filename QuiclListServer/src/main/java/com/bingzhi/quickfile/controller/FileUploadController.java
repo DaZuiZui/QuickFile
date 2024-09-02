@@ -12,12 +12,12 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:8081") // 允许来自指定域名的请求
 @RestController
 @RequestMapping("/api/upload")
 public class FileUploadController {
 
-    private static final String UPLOAD_DIR = "/uploads/"; // 文件上传目录
+    private static final String UPLOAD_DIR = "/Users/yangyida/Documents/project/QuiclList/QuickFile/QuiclListServer/src/main/resources/"; // 文件上传目录
     private static final long CHUNK_SIZE = 5 * 1024 * 1024; // 分片大小
 
     // 初始化上传，返回上传ID和已上传的分片信息
@@ -44,26 +44,36 @@ public class FileUploadController {
     @PostMapping("/chunk")
     public ResponseEntity<String> uploadChunk(@RequestParam String uploadId,
                                               @RequestParam int chunkIndex,
-                                              @RequestParam MultipartFile chunk) throws IOException, IOException {
+                                              @RequestParam MultipartFile chunk) throws IOException {
         String fileDir = UPLOAD_DIR + uploadId; // 获取上传目录路径
+        File dir = new File(fileDir);
+
+        // 确保目录存在，如果不存在则创建
+        if (!dir.exists()) {
+            dir.mkdirs(); // 创建目录，包括必要的但不存在的父目录
+        }
+
         File chunkFile = new File(fileDir, String.valueOf(chunkIndex)); // 创建分片文件
         chunk.transferTo(chunkFile); // 保存分片数据到服务器
+
         return ResponseEntity.ok("Chunk uploaded successfully.");
     }
 
+
     // 完成上传，合并所有分片
     @PostMapping("/complete")
-    public ResponseEntity<String> completeUpload(@RequestParam String uploadId) throws IOException {
+    public ResponseEntity<String> completeUpload(@RequestParam("uploadId") String uploadId , @RequestParam("fileName")String fileName) throws IOException {
         File dir = new File(UPLOAD_DIR + uploadId); // 获取上传目录
         File[] chunks = dir.listFiles(); // 获取所有分片文件
         Arrays.sort(chunks, Comparator.comparingInt(f -> Integer.parseInt(f.getName()))); // 按分片索引排序
-        File completeFile = new File(UPLOAD_DIR + uploadId + ".complete"); // 创建完整文件
+        File completeFile = new File(UPLOAD_DIR + "/res/"+ uploadId + "/" + fileName); // 创建完整文件
 
         try (RandomAccessFile raf = new RandomAccessFile(completeFile, "rw")) {
             // 依次写入所有分片到完整文件
             for (File chunk : chunks) {
                 byte[] chunkData = Files.readAllBytes(chunk.toPath());
                 raf.write(chunkData);
+                chunk.delete();
             }
         }
 
