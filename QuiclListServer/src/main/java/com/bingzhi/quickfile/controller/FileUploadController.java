@@ -24,7 +24,9 @@ public class FileUploadController {
     @PostMapping("/init")
     public ResponseEntity<Map<String, Object>> initUpload(@RequestBody UploadRequest uploadRequest) {
         String fileMd5 = uploadRequest.getFileMd5(); // 获取文件的MD5值
-        File file = new File(UPLOAD_DIR + fileMd5); // 创建上传文件目录
+        String uploadId = UUID.randomUUID().toString(); // 生成唯一的上传ID
+        File file = new File(UPLOAD_DIR + uploadId); // 创建上传文件目录
+        System.err.println("fileMd5"+fileMd5);
         file.mkdirs();
 
         // 获取已上传的分片信息
@@ -33,7 +35,7 @@ public class FileUploadController {
                 .map(f -> Integer.parseInt(f.getName()))
                 .collect(Collectors.toList());
 
-        String uploadId = UUID.randomUUID().toString(); // 生成唯一的上传ID
+
         Map<String, Object> response = new HashMap<>();
         response.put("uploadId", uploadId); // 返回上传ID
         response.put("uploadedChunks", uploadedChunkIndexes); // 返回已上传的分片
@@ -47,7 +49,7 @@ public class FileUploadController {
                                               @RequestParam MultipartFile chunk) throws IOException {
         String fileDir = UPLOAD_DIR + uploadId; // 获取上传目录路径
         File dir = new File(fileDir);
-
+        System.err.println(uploadId);
         // 确保目录存在，如果不存在则创建
         if (!dir.exists()) {
             dir.mkdirs(); // 创建目录，包括必要的但不存在的父目录
@@ -62,11 +64,17 @@ public class FileUploadController {
 
     // 完成上传，合并所有分片
     @PostMapping("/complete")
-    public ResponseEntity<String> completeUpload(@RequestParam("uploadId") String uploadId , @RequestParam("fileName")String fileName) throws IOException {
+    public ResponseEntity<HashMap> completeUpload(@RequestParam("uploadId") String uploadId , @RequestParam("fileName")String fileName) throws IOException {
+        System.err.println("uploadId is "+uploadId);
         File dir = new File(UPLOAD_DIR + uploadId); // 获取上传目录
         File[] chunks = dir.listFiles(); // 获取所有分片文件
         Arrays.sort(chunks, Comparator.comparingInt(f -> Integer.parseInt(f.getName()))); // 按分片索引排序
-        File completeFile = new File(UPLOAD_DIR + "/res/"+ uploadId + "/" + fileName); // 创建完整文件
+
+        File aaa = new File(UPLOAD_DIR + "/res/"+ uploadId );
+        aaa.mkdir();
+
+        File completeFile = new File(UPLOAD_DIR +"/res/"+ uploadId +"/"+ fileName); // 创建完整文件
+
 
         try (RandomAccessFile raf = new RandomAccessFile(completeFile, "rw")) {
             // 依次写入所有分片到完整文件
@@ -77,6 +85,12 @@ public class FileUploadController {
             }
         }
 
-        return ResponseEntity.ok("Upload completed successfully.");
+        dir.delete();
+
+        HashMap<String,String> res=  new HashMap<>();
+        res.put("uploadId",uploadId);
+        res.put("fileName",fileName);
+
+        return ResponseEntity.ok(res);
     }
 }
