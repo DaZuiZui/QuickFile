@@ -38,7 +38,7 @@ export default {
       this.extension = this.file.name.split('.').pop();
       
 
-      const { data: uploadInfo } = await axios.post('http://localhost:8080/api/upload/init', {
+      const { data: uploadInfo } = await axios.post('http://localhost:9999/api/upload/init', {
         fileName: this.file.name,
         fileSize: this.file.size,
         fileMd5,
@@ -107,12 +107,12 @@ export default {
         formData.append('chunkIndex', chunkIndex); // 添加分片索引
         formData.append('chunk', chunk); // 添加分片数据
 
-        await axios.post('http://localhost:8080/api/upload/chunk', formData); // 上传当前分片
+        await axios.post('http://localhost:9999/api/upload/chunk', formData); // 上传当前分片
         this.updateProgress(chunkIndex, chunks); // 更新上传进度
       }
 
       // 所有分片上传完成后通知服务器完成上传
-      await axios.post('http://localhost:8080/api/upload/complete?uploadId='+this.uploadId+"&fileName="+this.file.name);
+      await axios.post('http://localhost:9999/api/upload/complete?uploadId='+this.uploadId+"&fileName="+this.file.name);
       this.uploadProgress = 100; // 上传进度设置为100%
     },
 

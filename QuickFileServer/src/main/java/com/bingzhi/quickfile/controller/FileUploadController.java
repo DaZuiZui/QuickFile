@@ -1,6 +1,7 @@
 package com.bingzhi.quickfile.controller;
 
 import com.bingzhi.quickfile.domain.UploadRequest;
+import com.bingzhi.quickfile.util.FileMd5Calculator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,15 +10,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "http://localhost:8081") // 允许来自指定域名的请求
+@CrossOrigin(origins = "http://localhost:8080") // 允许来自指定域名的请求
 @RestController
 @RequestMapping("/api/upload")
 public class FileUploadController {
 
-    private static final String UPLOAD_DIR = "/Users/yangyida/Documents/project/QuiclList/QuickFile/QuiclListServer/src/main/resources/"; // 文件上传目录
+    private static final String UPLOAD_DIR = "/Users/yangyida/Documents/project/QuickFile/QuickFileServer/src/main/resources"; // 文件上传目录
     private static final long CHUNK_SIZE = 5 * 1024 * 1024; // 分片大小
 
     // 初始化上传，返回上传ID和已上传的分片信息
@@ -64,7 +66,7 @@ public class FileUploadController {
 
     // 完成上传，合并所有分片
     @PostMapping("/complete")
-    public ResponseEntity<HashMap> completeUpload(@RequestParam("uploadId") String uploadId , @RequestParam("fileName")String fileName) throws IOException {
+    public ResponseEntity<HashMap> completeUpload(@RequestParam("uploadId") String uploadId , @RequestParam("fileName")String fileName , @RequestParam("md5")String md5) throws IOException, NoSuchAlgorithmException {
         System.err.println("uploadId is "+uploadId);
         File dir = new File(UPLOAD_DIR + uploadId); // 获取上传目录
         File[] chunks = dir.listFiles(); // 获取所有分片文件
@@ -86,6 +88,11 @@ public class FileUploadController {
         }
 
         dir.delete();
+
+        String againPassWord = FileMd5Calculator.calculateFileMd5(completeFile);
+        if (!md5.equals(againPassWord)) {
+            //todo 文件不一致
+        }
 
         HashMap<String,String> res=  new HashMap<>();
         res.put("uploadId",uploadId);

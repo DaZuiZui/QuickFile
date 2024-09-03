@@ -25,7 +25,12 @@ public class FileController {
     @Autowired
     private FileService fileService;
 
-    // 初始化上传，返回上传ID和已上传的分片信息
+
+    /**
+     * 初始化文件上传，返回上传ID和已上传的分片信息
+     * @param uploadRequest
+     * @return
+     */
     @PostMapping("/init")
     public ResponseEntity<Map<String, Object>> initUpload(@RequestBody UploadRequest uploadRequest) {
         return fileService.initUpload(uploadRequest);
