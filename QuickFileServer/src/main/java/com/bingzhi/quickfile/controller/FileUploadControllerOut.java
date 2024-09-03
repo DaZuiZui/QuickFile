@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:8080") // 允许来自指定域名的请求
 @RestController
 @RequestMapping("/api/upload")
-public class FileUploadController {
+public class FileUploadControllerOut {
 
     private static final String UPLOAD_DIR = "/Users/yangyida/Documents/project/QuickFile/QuickFileServer/src/main/resources"; // 文件上传目录
     private static final long CHUNK_SIZE = 5 * 1024 * 1024; // 分片大小
@@ -92,6 +92,7 @@ public class FileUploadController {
         String againPassWord = FileMd5Calculator.calculateFileMd5(completeFile);
         if (!md5.equals(againPassWord)) {
             //todo 文件不一致
+
         }
 
         HashMap<String,String> res=  new HashMap<>();
