@@ -23,6 +23,7 @@ export default {
       uploadedChunks: [], // 已上传的分片索引
       uploadId: '', // 上传ID，用于标识一次上传过程
       extension: '', //file name
+      fileMd5: ''
     };
   },
   methods: {
@@ -33,6 +34,7 @@ export default {
 
       // 计算文件的MD5值
       const fileMd5 = await this.calculateFileMd5(this.file);
+      this.fileMd5 = fileMd5;
 
       // 初始化上传过程，获取uploadId和已上传的分片信息
       this.extension = this.file.name.split('.').pop();
@@ -112,7 +114,7 @@ export default {
       }
 
       // 所有分片上传完成后通知服务器完成上传
-      await axios.post('http://localhost:9999/api/upload/complete?uploadId='+this.uploadId+"&fileName="+this.file.name);
+      await axios.post('http://localhost:9999/api/upload/complete?uploadId='+this.uploadId+"&fileName="+this.file.name+"&md5="+this.fileMd5);
       this.uploadProgress = 100; // 上传进度设置为100%
     },
 

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 public class FileServiceImpl implements FileService {
 
-    private static final String UPLOAD_DIR = "/Users/yangyida/Documents/project/QuiclList/QuickFile/QuiclListServer/src/main/resources/"; // 文件上传目录
+    private static final String UPLOAD_DIR = "/Users/yangyida/Documents/project/QuiclList/QuickFile/QuiclListServer/src/main/resources/tmp/"; // 文件上传目录
 
     /**
      * todo 问旭哥这个要不要做成灵活的 on tuesday

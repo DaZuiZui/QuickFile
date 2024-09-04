@@ -19,7 +19,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/upload")
 public class FileUploadControllerOut {
 
-    private static final String UPLOAD_DIR = "/Users/yangyida/Documents/project/QuickFile/QuickFileServer/src/main/resources"; // 文件上传目录
+    private static final String UPLOAD_DIR = "/Users/yangyida/Documents/project/QuickFile/QuickFileServer/src/main/resources/tmp/"; // 文件上传目录
+    private static final String UPLOAD_SAVE_DIR = "/Users/yangyida/Documents/project/QuickFile/QuickFileServer/src/main/resources/"; // 文件上传目录
     private static final long CHUNK_SIZE = 5 * 1024 * 1024; // 分片大小
 
     // 初始化上传，返回上传ID和已上传的分片信息
@@ -72,10 +73,10 @@ public class FileUploadControllerOut {
         File[] chunks = dir.listFiles(); // 获取所有分片文件
         Arrays.sort(chunks, Comparator.comparingInt(f -> Integer.parseInt(f.getName()))); // 按分片索引排序
 
-        File aaa = new File(UPLOAD_DIR + "/res/"+ uploadId );
+        File aaa = new File(UPLOAD_SAVE_DIR + "/res/"+ uploadId );
         aaa.mkdir();
 
-        File completeFile = new File(UPLOAD_DIR +"/res/"+ uploadId +"/"+ fileName); // 创建完整文件
+        File completeFile = new File(UPLOAD_SAVE_DIR +"/res/"+ uploadId +"/"+ fileName); // 创建完整文件
 
 
         try (RandomAccessFile raf = new RandomAccessFile(completeFile, "rw")) {
@@ -87,7 +88,7 @@ public class FileUploadControllerOut {
             }
         }
 
-        dir.delete();
+//        dir.delete();
 
         String againPassWord = FileMd5Calculator.calculateFileMd5(completeFile);
         if (!md5.equals(againPassWord)) {
